@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wage Calculator</title>
+    <style>
+        .option-container {
+            margin: 10px 0;
+        }
+        .option-header {
+            cursor: pointer;
+            font-weight: bold;
+            color: #007bff;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+        .option-content {
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+            max-height: 0;
+            padding: 0 10px;
+            background-color: #f9f9f9;
+        }
+        .option-content.open {
+            max-height: 200px; /* Adjust based on your content size */
+        }
+        .option-content input {
+            margin-bottom: 10px;
+            display: block;
+            width: calc(100% - 20px);
+            margin-left: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Wage Calculator</h1>
+
+    <div id="optionList">
+        <div class="option-container" id="annualSalaryOption">
+            <div class="option-header">Annual Salary</div>
+            <div class="option-content">
+                <label for="annualSalary">Enter Annual Salary:</label>
+                <input type="number" id="annualSalary" name="annualSalary" step="0.01">
+            </div>
+        </div>
+
+        <div class="option-container" id="monthlyWageOption">
+            <div class="option-header">Monthly Wage</div>
+            <div class="option-content">
+                <label for="monthlyWage">Enter Monthly Wage:</label>
+                <input type="number" id="monthlyWage" name="monthlyWage" step="0.01">
+            </div>
+        </div>
+
+        <div class="option-container" id="weeklyWageOption">
+            <div class="option-header">Weekly Wage</div>
+            <div class="option-content">
+                <label for="weeklyWage">Enter Weekly Wage:</label>
+                <input type="number" id="weeklyWage" name="weeklyWage" step="0.01">
+            </div>
+        </div>
+
+        <div class="option-container" id="dailyWageOption">
+            <div class="option-header">Daily Wage</div>
+            <div class="option-content">
+                <label for="dailyWage">Enter Daily Wage:</label>
+                <input type="number" id="dailyWage" name="dailyWage" step="0.01">
+            </div>
+        </div>
+
+        <div class="option-container" id="hourlyWageOption">
+            <div class="option-header">Hourly Wage</div>
+            <div class="option-content">
+                <label for="hourlyWage">Enter Hourly Wage:</label>
+                <input type="number" id="hourlyWage" name="hourlyWage" step="0.01">
+            </div>
+        </div>
+
+        <div class="option-container" id="hoursPerWeekOption">
+            <div class="option-header">Hours per Week</div>
+            <div class="option-content">
+                <label for="hoursPerWeek">Enter Hours per Week:</label>
+                <input type="number" id="hoursPerWeek" name="hoursPerWeek" value="40">
+            </div>
+        </div>
+    </div>
+
+    <button id="calculateButton">Calculate Wages</button>
+
+    <h2>Calculated Wages:</h2>
+    <div>
+        <label for="calculatedAnnualSalary">Calculated Annual Salary:</label>
+        <input type="text" id="calculatedAnnualSalary" readonly><br>
+
+        <label for="calculatedMonthlyWage">Calculated Monthly Wage:</label>
+        <input type="text" id="calculatedMonthlyWage" readonly><br>
+
+        <label for="calculatedWeeklyWage">Calculated Weekly Wage:</label>
+        <input type="text" id="calculatedWeeklyWage" readonly><br>
+
+        <label for="calculatedDailyWage">Calculated Daily Wage:</label>
+        <input type="text" id="calculatedDailyWage" readonly><br>
+
+        <label for="calculatedHourlyWage">Calculated Hourly Wage:</label>
+        <input type="text" id="calculatedHourlyWage" readonly><br>
+    </div>
+
+    <script>
+        document.querySelectorAll('.option-header').forEach(header => {
+            header.addEventListener('click', function() {
+                const currentContent = this.nextElementSibling;
+                const allContents = document.querySelectorAll('.option-content');
+
+                allContents.forEach(content => {
+                    if (content !== currentContent) {
+                        content.classList.remove('open');
+                    }
+                });
+
+                currentContent.classList.toggle('open');
+            });
+        });
+
+        document.getElementById('calculateButton').addEventListener('click', function() {
+            const data = {};
+            document.querySelectorAll('.option-content input').forEach(input => {
+                if (input.value.trim() !== '') {
+                    data[input.name] = parseFloat(input.value);
+                }
+            });
+
+            fetch('/api/v1/wages/calculate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data),
+            })
+            .then(response => response.json())
+            .then(result => {
+                document.getElementById('calculatedAnnualSalary').value = result.annualSalary || '';
+                document.getElementById('calculatedMonthlyWage').value = result.monthlyWage || '';
+                document.getElementById('calculatedWeeklyWage').value = result.weeklyWage || '';
+                document.getElementById('calculatedDailyWage').value = result.dailyWage || '';
+                document.getElementById('calculatedHourlyWage').value = result.hourlyWage || '';
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        });
+    </script>
+</body>
+</html>
